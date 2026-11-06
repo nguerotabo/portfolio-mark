@@ -189,81 +189,212 @@ The sentence you can say, if it is true: "I used an assistant for scaffolding an
 
 ## Weeks
 
-Do the week from the top. The week is done only when its done line is true. If the week has about 10 hours, finish the done line and skip polish.
+Do the week from the top. Each week has a goal, the steps, a done line, and a stop line. The week is done only when its done line is true. Ten to twenty hours is the budget. If the week has about 10 hours, finish the done line and skip polish.
 
 ### 9–15 November — the spec
 
-Create the empty folders listed above. Write `spec/ANALYTICS.md` with the product paragraph, the normalized row, the date rule, the money rule, the three formulas with the worked examples, the path rules, and the refusals. The next morning, recompute +$1,100 and the $8,000 path from that file alone.
+Write `spec/ANALYTICS.md`, the contract. No application code.
 
-Done when that recomputation needs no other document. Do not write Java, a page, or a fixture.
+1. Create the empty folders from the architecture table: `spec/fixtures/`, `java/src/main/java/mark/ledger/`, `java/src/main/java/mark/market/`, `java/src/main/java/mark/analytics/`, `java/src/test/java/mark/`, `python/verifier/`, `web/`, `scripts/`, and `.github/workflows/`. Do not copy Northrail into any of them.
+2. Create `spec/ANALYTICS.md`. Open it with one paragraph: Portfolio Mark reads one activities file and answers pick impact, the portfolio benchmark, and timing. Replacement replay and an assistant are out of this version.
+3. Write the normalized row: date, type, symbol, currency, quantity, unit price, cash. Quantity is a share count only on a trade. On a deposit, dividend, interest, or tax row, that column copies the cash and is not shares.
+4. Write the date rule. The trade date is `effective_date`. Ignore `settlement_date`. Ignore an executed-at phrase inside the description.
+5. Write the money rule. Share counts stay exact, including `3.9152`. Unit price stays at the file's precision, such as `185.8904`. Cash is whole cents. If shares times price, adjusted for commission, is within one cent of the file's cash, keep the file's cash and note that a cent was rounded. A wider gap refuses the row.
+6. Write the three formulas in words and with the made-up numbers, so a reader can recompute them from this file alone. Stock A ends at $6,500 against a fund path of $5,400, impact +$1,100. Stock B is +$100. The account is $9,000 against $7,800, gap +$1,200, which is the sum of the impacts. Timing is $8,400 against $9,000, which is −$600, and it is not added to the gap.
+7. Write the small sale. $4,000 when the fund is $20 buys 200 shares. Selling 100 when the fund is $40 sets aside $4,000. The other 100, at $40 on the as-of date, are worth $4,000. The path ends at $8,000. The pick is the real ending wealth minus $8,000, not the $4,000 of growth.
+8. Write the path rules. Symbol-less cash, including a deposit, interest, and a non-resident tax, is applied to both paths. A dividend stays on that holding and inside its pick. The fund path does not invent a dividend. If the file has deposits, timing uses the deposit dates. A buy spends cash already there and is not a second contribution.
+9. Write the refusals. A second currency, a second account, an unknown activity type, a sale larger than the shares held, and a missing close. Each refusal names what was wrong.
+10. Close the file. The next morning, recompute +$1,100 and the $8,000 sale path using only `spec/ANALYTICS.md`. If you need this file to do it, the spec is not done.
+
+Done when `spec/ANALYTICS.md` is the only document a new reader needs to recompute the two examples.
+
+Stop. Do not create a Java class, a React component, or a fixture file this week.
 
 ### 16–22 November — cases
 
-Add a case for each of these, with cents or a refusal sentence: deposit quantity 700 is cash not shares; dividend quantity 30.90 is cash not shares; interest of 1 cent and tax of 2 cents do not change the pick gap; four buys at one timestamp stay four lots; a 14 June deposit spent on 22 June makes timing and the benchmark use different dates, with one cent of cash left; a dividend then a buy puts the dividend inside the pick and treats the buy as its own purchase; as-of on a non-trade last row uses the last market close on or before that date; a sale of half applies to every lot; 2.6897 shares at 185.8904 with cash −499.99 is accepted and a two-cent gap is refused; USD, a second account, and an unknown activity type refuse.
+Add one expected outcome for every real-file case, in the same spec.
 
-Done when no case says "to be decided." Do not start Java.
+1. Add a Cases section. Each case gets a name, the input in one or two rows, and either the cents that come out or the exact refusal.
+2. Case deposit-quantity. A `MoneyMovement` row with quantity 700 and cash 700. Expected: cash of 70000 cents, and zero shares.
+3. Case dividend-quantity. A dividend with quantity 30.90 and cash 30.90. Expected: cash on that symbol, not 30.90 shares.
+4. Case interest-and-tax. Interest of 1 cent and a non-resident tax of 2 cents, no symbol. Expected: both paths change by the same cash, so the pick gap does not change.
+5. Case same-second. Four buys with the same timestamp. Expected: four lots, in file order, not one merged lot.
+6. Case deposit-then-buy. $19,260 deposited on 14 June, spent on 22 June, one cent left. Expected: timing buys the fund on 14 June. The benchmark buys the fund on 22 June. The one cent remains cash on both.
+7. Case dividend-then-buy. Dividend of $30.90, then a buy of $30.89 the next day. Expected: the dividend is inside that symbol's pick. The buy is a separate purchase. The fund path has no invented dividend.
+8. Case as-of. The last row is interest, not a trade. Expected: the valuation day is that date, and the close used is the last market close on or before it.
+9. Case sell-fraction. A sale of half the shares, across two lots. Expected: half of each lot, on the real path and on the fund path, each at its own price. A sale larger than the shares held is a refusal.
+10. Case nearest-cent. 2.6897 shares at 185.8904 with cash −499.99. Expected: accepted, with a note that a cent was rounded. A copy of the row whose cash is off by two cents is refused.
+11. Case boundaries. One USD row refuses the run. A second account id refuses the run. An activity type that is not in the spec refuses the run and the message contains that type.
+
+Done when every case in the Cases section has a number or a refusal sentence. Nothing says "to be decided."
+
+Stop. Do not start the Java reader until those sentences exist. If a case has no honest answer, change the rule in the spec, not later in the code.
 
 ### 23–29 November — fixtures
 
-Build the fixture set in Workflows, by hand, with account id `DEMO`. Recompute `expected.txt` the next day.
+Turn the cases into fixture folders with answers computed by hand.
 
-Done when the folders exist and each expected file can be recomputed without running code. Do not change an expected number to hide uncertainty.
+1. For each fixture, create `spec/fixtures/<name>/` with `activities.csv`, `prices.csv`, and `expected.txt`. The activities file uses the Wealthsimple header: `effective_date,effective_time,settlement_date,account_id,account_type,activity_type,activity_sub_type,description,direction,symbol,name,currency,quantity,unit_price,commission,net_cash_amount`.
+2. Use account id `DEMO`. Do not commit a real account id.
+3. `prices.csv` is `symbol,date,close`. Put the demo symbols and about eight comparison funds in it, only on the dates the fixtures use. Type the closes yourself. Do not call a market site from a program.
+4. `expected.txt` uses labeled whole cents: `actual`, `benchmark`, `selection`, `timing`, and one line per symbol impact. A refusal fixture instead has one line, `error`, containing the symbol, the date, or the activity type.
+5. Build buys-only, pick-impact, benchmark, and timing from the same small history, so you can see that the symbol impacts add to selection and that timing is a different pair of totals.
+6. Build one sell fixture from the half-the-shares case. Compute both paths on paper before you type `expected.txt`.
+7. Build the refusal fixtures: missing close, second currency, cash off by two cents, sell larger than the shares held.
+8. Build deposit-quantity and nearest-cent from the real export's shape, with made-up account ids and the amounts from the spec.
+9. Check the arithmetic a second time the next day. If the paper total and `expected.txt` disagree, fix the file you typed wrong. If both disagree with the spec, fix the spec first.
+
+Done when every fixture named above has a folder and an expected file you can recompute without running code. That is the minimum set in Workflows: buys-only, pick-impact, benchmark, timing, one sell, missing close, second currency, cash off by two cents, sell larger than the shares held, deposit-quantity, nearest-cent.
+
+Stop. Do not change an expected number because you are unsure. Uncertainty means the spec case is unfinished.
 
 ### 30 November – 6 December — the reader
 
-Java 21 Gradle project, JUnit 5, package `mark`, no Spring, no database. `mark.ledger` holds an activity plus its source row number. `mark.market` reads closes and fails with the symbol and the date when one is missing. Tests pass for deposit-quantity, nearest-cent, missing close, and second currency.
+A Java program that reads the fixtures into activities and closes, and does not replay yet.
 
-Done when those four pass and a report line can name its source row. Do not replay yet.
+1. Create a Java 21 Gradle project in `java/`. Use JUnit 5. Do not add Spring, and do not add a database.
+2. In `mark.ledger`, write an Activity type with the normalized fields plus the source row number.
+3. Write a test that builds three activities by hand and reads them back. No file is involved yet.
+4. Write the CSV reader. Unknown column: fail with that column name. Date: `effective_date`. Trade plus BUY is a buy. Trade plus SELL is a sell. `MoneyMovement` plus `EFT` is a deposit. Dividend, Interest, and Tax map to those types. Any other activity type fails, and the message contains the type.
+5. On a trade, quantity is shares. On every other type, ignore quantity as a share count and take the cash from `net_cash_amount`.
+6. Convert cash to cents. Apply the one-cent check, including commission. Keep a flag on the row when a cent was rounded.
+7. Refuse a second currency or a second account id.
+8. In `mark.market`, read `prices.csv`. A missing close fails with the symbol and the date. The close for a valuation day is the last close on or before that day.
+9. Point the tests at deposit-quantity, nearest-cent, the missing-close refusal, and the second-currency refusal.
+
+Done when those four fixtures pass. A report line can name the source row number it came from.
+
+Stop. Do not write the replay this week. A reader that invents a share count for a deposit is not done.
 
 ### 7–13 December — buys-only replay
 
-One function replays buys into the comparison fund. No sells. Ending value is shares still held at the as-of close, plus leftover cash. The buys-only fixture matches to the cent.
+One buys-only replay into the comparison fund matches its fixture to the cent.
 
-Done when a second run gives the same cents. Commit names the fixture. Do not start the page.
+1. In `mark.analytics`, write one function. Input: the activities, the price book, the comparison symbol, the as-of date. Output: shares of the fund bought with each buy's cash, at that day's close.
+2. Do not handle sells. Ending value is shares still held times the as-of close, plus leftover cash.
+3. Run the buys-only fixture. Compare every labeled cent in `expected.txt`.
+4. On a mismatch, decide which side is wrong by recomputing on paper. Change the code if the paper matches the spec. Change the spec, then the expected file, only if the rule itself was wrong.
+5. Commit when the fixture is green. The commit message says which fixture passed.
+
+Done when the buys-only expected file matches, and the command can be run again with the same result.
+
+Stop. Do not start pick impact, timing, or the page. Do not edit `expected.txt` to match a result you have not recomputed.
 
 ### 14–20 December — pick impact and the benchmark
 
-Per-symbol impact includes that symbol's dividends. Symbol-less cash is on both totals. A test sums the impacts and compares them to selection. Both fixtures match.
+Pick impact and the portfolio benchmark fall out of that same replay.
 
-Done when dropping one symbol fails the sum test. Do not build the arbitrary symbol swap.
+1. For each symbol, ending wealth is the shares still held at the as-of close, plus the cash from that symbol's dividends. Subtract the fund path of the dollars that bought that symbol. That difference is the pick impact.
+2. The benchmark replays every buy into the comparison fund. Selection is the actual ending value minus that fund ending value.
+3. Put symbol-less cash on both ending values, so a deposit, interest, or tax does not become a pick.
+4. Add a test that sums the symbol impacts and asserts the sum equals selection.
+5. Run the pick-impact fixture and the benchmark fixture. Both must match to the cent.
+6. Commit only when both are green.
+
+Done when the two fixtures match, and the sum test fails if you drop one symbol's impact.
+
+Stop. Do not add a control that swaps an arbitrary pair of symbols. That is the stretch.
 
 ### 21–27 December — holiday
 
-If any replay fixture is red, fix that and do not start timing. If they are green, add timing in its own field, with the sentence about later cash, and a test that it is not added to selection.
+A short week. Timing only if last week's fixtures are already green.
 
-Done when timing matches, or the red replay fixture is fixed instead. No sells and no page.
+1. If the buys-only, pick-impact, or benchmark fixture is red, spend the week on that failure. Do not open timing.
+2. If they are green, write timing beside the replay. Contributions are the deposits when the file has any. Otherwise each buy is a contribution on its own date.
+3. Both sides hold only the comparison fund. Neither side sells because a stock was sold. One side buys on the contribution dates and holds. The other puts the same dollars in on the first contribution date.
+4. The report text says that later cash is treated as if it had already existed on the first date.
+5. Assert that the timing gap is stored in its own field and is not added to selection.
+6. Run the timing fixture. Commit when it matches.
+
+Done when timing matches, or you wrote down which replay fixture is still red and fixed that instead.
+
+Stop. Do not add sells, the page, or a new rule.
 
 ### 28 December – 3 January — sell, dividend, fee
 
-Implement the fraction rule. Wire the oversell refusal. Dividend fixture: cash on the actual holding only, sum of impacts still holds. Fee fixture: cash falls on both paths, selection unchanged. If the sell fixture is still red on 3 January, leave `expected.txt` alone and write the failure at the top of the spec.
+One sell fixture, one dividend fixture, and one fee fixture.
 
-Done when dividend and fee match, and the sell fixture either matches or is an honest written failure.
+1. A sale's fraction is shares sold divided by shares held that day. Apply that fraction to every lot, and to the fund shares that came from those lots. Each path uses its own price on the sale date.
+2. Selling more shares than are held refuses the run. Wire the fixture that expects that refusal.
+3. Run the sell fixture until both paths match `expected.txt`.
+4. Add the dividend fixture. The cash lands on the actual holding only. The fund path does not gain a dividend. The pick includes the dividend, and the sum of impacts still equals selection.
+5. Add the fee fixture from the tax row. Cash falls on both paths. Selection does not change.
+6. If the sell fixture is still red on 3 January, leave the expected file alone and write the failure at the top of the spec. The buys-only demo is the fallback.
+
+Done when dividend and fee match. The sell fixture either matches or is an honest, written failure.
+
+Stop. Do not make the sale consume one chosen lot. Both engines would then be free to pick different lots.
 
 ### 4–10 January — Python
 
-Write the verifier from the spec and the fixtures, not from the Java methods. `scripts/compare` prints the fixture and the field. Every fixture matches. A planted one-cent change makes compare fail. Delete that copy.
+Python recomputes every fixture without reading the Java methods.
 
-Done when compare is green on the real fixtures and you have seen it fail on purpose. Do not start the page.
+1. Read `spec/ANALYTICS.md` and the fixture files. Do not read the Java replay methods while you write the Python.
+2. Put the verifier in `python/verifier/`. It reads the same `activities.csv`, `prices.csv`, and `expected.txt`.
+3. Write `scripts/compare` so it runs Java and Python and, on a mismatch, prints the fixture name and the field name.
+4. Run it on every fixture. A mismatch is a bug in one engine or in the spec. Fix the wrong one. Do not special-case a fixture.
+5. Copy one fixture, change one expected cent, and confirm compare fails on that field. Delete the copy.
+6. Commit when compare is green on the real fixtures.
+
+Done when compare passes, and you have seen it fail on a field you changed on purpose.
+
+Stop. Do not import Java from Python, and do not start the page.
 
 ### 11–17 January — page and label
 
-React and TypeScript page, one screen, three answers, lots under a symbol, Java produces the report. Add the money-path workflow. Change one fixture input and confirm the page moved only because the report moved.
+One React and TypeScript page that shows Java's report, plus the pull-request label.
 
-Done when someone else can upload the demo file, pick a fund, and read the three answers. Do not put arithmetic in the page.
+1. Create `web/` with React and TypeScript. Next.js is fine. The page has no formula in it.
+2. One page, no Next button. The transaction table lists every activity from the report: date, type, symbol, shares, trade price, and cash.
+3. The three answer blocks stay empty until a comparison fund is chosen. Then they show pick impact, the benchmark pair, and timing.
+4. Opening a symbol lists the lots under its impact.
+5. The page runs the Java program and reads its report. It does not recompute.
+6. Add a GitHub Actions workflow. If the pull request touches `java/src/main/java/mark/`, the price reader, rounding, or the report fields, apply the label `money-path`. A change that is only markdown does not get the label.
+7. Change one number in a fixture, rerun Java, and confirm the page changed only because the report changed.
+
+Done when a classmate can upload the demo file, pick a fund, and read the three answers. The label appears on a math change and not on a wording change.
+
+Stop. Do not put a second copy of the arithmetic in the page. Do not build the replacement control or an assistant.
 
 ### 18–24 January — cold run
 
-Timed eight-minute path from a fresh terminal. Fix only a break in that path. README in the words you will say: how to run Java, how to run compare, the three answers, no live prices, the value will not match the Wealthsimple app, no assistant, no replacement control. Record about 90 seconds of the clicks. Say the four tradeoffs once: nearest cent and say so; the sell rule written before the code; timing kept separate; Java serves the page.
+A cold run of the demo, a README, and a 90-second backup.
 
-Done when you can do the path without this file open, and the recording exists.
+1. From a fresh terminal, run compare, then open the page, and do the eight-minute path with a timer.
+2. Fix only a break in that path. A new idea goes on a list, not into the code.
+3. Write the README in the words you will say. How to run Java. How to run compare. What the three answers are. The value will not match the live Wealthsimple app. Prices were copied by hand. There is no assistant and no replacement control.
+4. Record about 90 seconds of the same clicks, in case the live file will not load.
+5. Say the four tradeoffs out loud once: nearest cent and say so, the sell rule written before the code, timing kept separate, Java serves the page.
+
+Done when you can do the click path without this file open, and the recording exists.
+
+Stop. Do not restyle the page, and do not add a fixture, unless the cold run actually failed.
 
 ### 25–31 January — freeze
 
-Rehearse the 30 minutes on two different days. On a break, use the rollback table. No new rule, fund, activity type, or price call.
+Freeze. Rehearse twice.
+
+1. Rehearse the 30 minutes on two different days.
+2. If something breaks, use the rollback table. Return to the last green commit rather than patching on the day.
+3. Read the README and the spec once. They should still describe the program you will open.
+4. Leave replacement replay and the assistant unbuilt.
+
+Done when two full rehearsals are done, and no rule changed during the week.
+
+Stop. No new activity type, no new fund, no live price call.
 
 ### February and March — reviews
 
-The week of a review, rehearse once and change nothing. If the sell fixture is red, show the spec and say so. If asked about the Wealthsimple balance, say the page uses the price file on the last activities date and will not match the live app. A fix after a review is only for something that failed in the room.
+The reviews. The program stays as it was at the freeze.
+
+1. The week of a review, rehearse once and change nothing.
+2. If a reviewer asks about a sale and that fixture is red, show the spec and say so.
+3. If they ask about the Wealthsimple balance, say the page uses the price file on the last date in the activities file, and it will not match the live app.
+4. After a review, a fix is allowed only for something that failed in the room. It is not a new feature.
+
+Done when the demo you give is the demo you froze.
+
+Stop. Do not start the assistant or the replacement control in the week of a review.
 
 ## Demo shape
 
