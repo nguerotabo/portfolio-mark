@@ -1,6 +1,3 @@
-Closes #
-
-
 ## What changed
 
 

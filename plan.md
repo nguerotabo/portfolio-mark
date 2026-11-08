@@ -12,7 +12,7 @@ When the morning recomputation works, the spec becomes the contract for formulas
 
 The early Python sketch and `demo.html` have been removed. Do not restore them. Do not treat any fund, including QQC, as a built-in default. Until the week of 18 January, `README.md` only points here.
 
-Ready by 31 January 2027. Interviews are most likely February and March 2027. One person, with agents writing most of the code under Who writes what. About 101 project hours over twelve weeks, plus about 3 hours a week of OOP practice, with one empty buffer week. The work runs the way a team with agents works: issues, pull requests, reviews, and releases.
+Ready by 31 January 2027. Interviews are most likely February and March 2027. One person, with agents writing most of the code under Who writes what. About 101 project hours over twelve weeks, plus about 3 hours a week of OOP practice, with one empty buffer week. The work runs the way a team with agents works: pull requests, reviews, and releases.
 
 ## What it is
 
@@ -106,7 +106,7 @@ The as-of date is never earlier than the last activity. The fund is a symbol the
 | `docs/decisions/` | One decision record per choice a reviewer could question: the context, the decision, the alternatives, and the cost |
 | `docs/mistakes.md` | One short postmortem per surprise: what happened, how it was caught, the root cause, and what now prevents it |
 | `docs/questions.md` | Every gate question you missed, and the questions a reviewer is likely to ask, answered in your words. The question bank for the review |
-| `.github/` | The CI workflow, the labeler's money-path globs, and the issue and pull request templates |
+| `.github/` | The CI workflow, the labeler's money-path globs, and the pull request template |
 | `exports/` | The real CSV and its own price files. Git ignores this directory and `.cursorignore` lists it. Never commit it. |
 
 The report fields are `asOf`, `fund`, `paths` (`allOnDayOne`, `fundOnYourDates`, `benchmark`, `account`), `steps` (`whenMoneyArrived`, `cashAndSales`, `stockSelection`), `headline`, `picks`, `bestPick`, `largestDrag`, `activities`, `warnings`, and `error`. `picks` lists, per symbol, its impact, each lot's value on both paths, and its dividends. Every money field is whole cents. `error` is present instead of the rest when the run refuses. A refusal fixture's `expected.json` holds that one error. Every other fixture's `expected.json` holds the fields its case checks, in the report's shape. The spec defines the full shape. Errors and warnings are compared by code and fields, never by wording.
@@ -303,21 +303,20 @@ The long generated run triggers from a `paths` filter on the same globs, not fro
 5. The fixture tests, and `scripts/compare` once it exists, must be green before the change is done.
 6. Do not edit an expected cent to match a result you have not recomputed on paper.
 
-### Issues and pull requests
+### Pull requests
 
-Every change moves the way it does on a team that works with agents: an issue, a branch, a pull request, a review, and a merge.
+Every change moves the way it does on a team that works with agents: a branch, a pull request, a review, and a merge. A pull request is the record of a change. The only GitHub issue is the pinned Status note.
 
-1. Every piece of work starts as a GitHub issue, written so an agent could build it from the issue alone: the context, what to build, the signatures or files, the fixtures that prove it under Done when, and what is out of scope. You write the money-path issues. An agent may draft the others, and you edit them before work starts.
-2. One issue, one branch, one pull request. Name the branch after the issue, for example `14-sale-fraction`. Keep a pull request small enough to read in one sitting.
-3. Commit on the branch whenever the tests you touched are green. Nothing is pushed to `main` directly.
-4. The pull request follows the template in `.github/`: What changed, Why, How I tested, Risk, and Written by. An agent may draft What changed. Why, How I tested, and Risk are yours, even when an agent wrote the code. Written by lists the files you typed and the files an agent typed. Write `Closes #14`, so the merge closes the issue.
-5. Merge when CI is green, the review is done, and the issue's Done when is true. Squash-merge, so `main` holds one commit per issue.
+1. One branch, one pull request. Name the branch after the work, for example `sale-fraction`. Keep a pull request small enough to read in one sitting. Stay inside that pull request's scope.
+2. Commit on the branch whenever the tests you touched are green. Nothing is pushed to `main` directly.
+3. The pull request follows the template in `.github/`: What changed, Why, How I tested, Risk, and Written by. An agent may draft What changed. Why, How I tested, and Risk are yours, even when an agent wrote the code. Written by lists the files you typed and the files an agent typed.
+4. Merge when the review is done and that change's done line is true. From the week of 23 November, CI is green as well. Squash-merge, so `main` holds one commit per pull request.
 
 ### Reviews
 
 Nothing merges without a review from someone who did not write it.
 
-1. On every pull request, start a new agent chat that has not seen the work. Ask it to review the diff against `spec/ANALYTICS.md` and the issue: correctness gaps, spec mismatches, and missing tests, not style. On a pull request that touches an `expected.json`, it checks the input files and the report's shape, never the cents. You decide what changes. In your files, you make the change yourself.
+1. On every pull request, start a new agent chat that has not seen the work. Ask it to review the diff against `spec/ANALYTICS.md` and the pull request: correctness gaps, spec mismatches, and missing tests, not style. On a pull request that touches an `expected.json`, it checks the input files and the report's shape, never the cents. You decide what changes. In your files, you make the change yourself.
 2. You review every pull request an agent wrote. On a money-path pull request, read every line and be able to explain any of them. On any other, read the whole diff and be able to say what each file does.
 3. Ask one person, a coworker, a classmate, or a mentor, to review three pull requests: the spec, the buys-only replay, and the sale fraction. Answer every comment in the thread, and either change the code or say why not. What they catch goes in `docs/mistakes.md`. If nobody can, the agent reviews stand, and you do not claim a human review.
 
@@ -385,7 +384,7 @@ You write these by hand:
 - The sale fraction.
 - The invariant sentences in Checks.
 - `docs/mistakes.md`, `docs/questions.md`, the decision records, the README's tradeoffs, and the weekly status.
-- The money-path issues, and the Why, How I tested, and Risk of every pull request.
+- The Why, How I tested, and Risk of every pull request.
 
 An agent writes the rest, and you review all of it: the Gradle project and the fixture runner, fixture input files typed from your description, the reader, the market lookups, the contribution paths, the steps and the headline, dividends and distributions, `Main.java`, the Python verifier, `scripts/compare`, `scripts/fetch-prices`, the generator and the invariant code, CI, and the page.
 
@@ -401,7 +400,7 @@ For your code: sketch, test, struggle, ask.
 For an agent's code:
 
 1. In `java/src/main/**`, you write the signatures and name the fixtures that prove them. The agent fills in the bodies. To extend your replay, it adds code behind signatures you wrote and never rewrites yours. Plumbing (Gradle, workflow YAML, the page) needs no signatures.
-2. One issue per pull request. Review it as Reviews says before you merge it. Its Why, How I tested, and Risk are yours.
+2. One pull request per change. Review it as Reviews says before you merge it. Its Why, How I tested, and Risk are yours.
 3. When money code fails, you diagnose first. Write down which rule broke and where before the agent proposes a fix, and if no failing test or fixture shows the bug yet, add one. If you are stuck after 20 minutes, ask for a hint, not a fix. You fix your files, and the agent fixes its own. Your diagnosis goes in the pull request's Why.
 4. The Python verifier comes from its own chat, on a different model from the one that wrote any Java, given only this file, the spec, and the fixtures.
 
@@ -463,14 +462,14 @@ About 3 hours a week, more in the three weeks before the round.
 
 ## Weeks
 
-Do the week from the top. Each week starts by opening its issues. The week is done only when its done line is true. Build weeks end with the gate. The hours are yours. They include the gate and about 45 minutes of issues, pull requests, reviews, and the status note, and they leave out OOP practice.
+Do the week from the top. The week is done only when its done line is true. Build weeks end with the gate. The hours are yours. They include the gate and about 45 minutes of pull requests, reviews, and the status note, and they leave out OOP practice.
 
 ### 9–15 November — the spec
 
 Write `spec/ANALYTICS.md` from the domain rules, in your own words. No application code. About 14 hours, plus the OOP baseline.
 
 1. Create `demo/` and `docs/`. Git ignores empty folders, so start each new folder with a one-line README. `exports/` is already gitignored; add it to `.cursorignore` too. Keep the real CSV there.
-2. Decide whether the repository is public. A reviewer can open a public one from your résumé, and the private-data rules already keep your real history out of it. Protect `main`, so changes land only through pull requests. Checks says which GitHub plan that needs. An agent adds the issue and pull request templates to `.github/`, with the parts listed in Issues and pull requests.
+2. Decide whether the repository is public. A reviewer can open a public one from your résumé, and the private-data rules already keep your real history out of it. Protect `main`, so changes land only through pull requests. Checks says which GitHub plan that needs. An agent adds the pull request template to `.github/`, with the parts listed in Pull requests.
 3. Open the spec with one paragraph: Portfolio Mark reads a case (an activities file, a price file, a distributions file, and `run.json` with a fund and an as-of date) and answers the bridge and the pick impacts. Replacement replay and an assistant are out of this version.
 4. Write the inputs, the case format, the normalized row, and the reading rules.
 5. Write the money rules: exact fractions, what a lot's value includes, half to even once per lot per path, and every total a sum of cents.
@@ -505,7 +504,7 @@ One fixture folder per case in the spec, each with an answer you computed on pap
 8. Then `self-holding` and `dividend-and-distribution`.
 9. Then the ten refusals. Each `expected.json` holds the error's code and fields. The wording of its message is not checked.
 10. Check the arithmetic again the next day. If the paper total and the file disagree, fix what you typed. If both disagree with the spec, fix the spec first.
-11. Each of steps 5 to 9 is its own issue and pull request.
+11. Each of steps 5 to 9 is its own pull request.
 
 Done when all 23 folders exist, every input file matches its description, and you computed every expected number on paper.
 
@@ -702,7 +701,7 @@ Expect to be interrupted. The core path works on its own. The numbers come from 
 | 1:00–2:00 | The bridge. When the money arrived, cash and sales, stock selection. The steps add up. |
 | 2:00–3:00 | Open the largest drag. The lines sum to the impact. |
 
-If they do not steer: the core path, then the architecture, then who wrote what, then the five check layers, then one entry from `docs/mistakes.md`, then the four tradeoffs, then their questions. For who wrote what, use the sentence at the end of Who writes what, then open one money-path pull request: the issue, the diff, the review, and the checks.
+If they do not steer: the core path, then the architecture, then who wrote what, then the five check layers, then one entry from `docs/mistakes.md`, then the four tradeoffs, then their questions. For who wrote what, use the sentence at the end of Who writes what, then open one money-path pull request: the diff, the review, and the checks.
 
 Show nothing you cannot explain two whys deep. Whatever you show is what they will ask about.
 
