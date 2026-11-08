@@ -1,19 +1,6 @@
 ---
-description: Always read plan.md before answering or changing Portfolio Mark.
+description: Portfolio Mark's agent rules live in AGENTS.md.
 alwaysApply: true
 ---
 
-# Read plan.md first
-
-On every request about this project, read `plan.md` at the repo root before answering or editing. It is the source of truth for scope, architecture, workflow, and how learning works.
-
-- Stay inside the January scope. Replacement replay and an assistant are out. Northrail is not imported. The page does not calculate. Prices are not fetched live.
-- After `spec/ANALYTICS.md` exists, formulas and expected cents live there. Code that disagrees with the spec is wrong. A spec that adds scope `plan.md` does not allow is cut back.
-- A rule change updates `plan.md` and `spec/ANALYTICS.md` in the same change, before the code. Recompute `expected.txt` by hand. Do not edit an expected cent to match an unverified result.
-- Follow the Learning section in `plan.md`. Do not write the replay, the sell fraction, the CSV rules, the expected cents, or the tradeoff prose unless the user explicitly asks for that named piece. Scaffolding, syntax, and error explanations are allowed.
-- The early sketch was removed. Do not restore it.
-
-```text
-# Wrong: write the replay, then adjust expected.txt until compare is green.
-# Right: the user writes the test and the cents. Help with one narrow question.
-```
+Before answering or editing anything in this project, read `AGENTS.md` at the repo root and follow it. Every agent rule for Portfolio Mark lives there. This file only points to it, so the two can never disagree.
