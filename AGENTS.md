@@ -21,23 +21,23 @@
 
 Follow "Who writes what" in `plan.md`.
 
-- The user writes these by hand: `spec/ANALYTICS.md`, every `expected.json`, `spec/fixtures/pending.txt`, the `Activity` records, `Rational` and its rounding method, the buys-only replay, the sale fraction, the invariant sentences, `docs/mistakes.md`, `docs/questions.md`, the decision records in `docs/decisions/`, the README's tradeoffs, the weekly status, the money-path issues, and the Why, How I tested, and Risk of every pull request. Do not write them, and do not change their logic outside a gate's scratch branch. Explain ideas, read errors, answer syntax questions, and review the user's code instead. If the user asks you to write one of them by name, say once that the sentence at the end of "Who writes what" would stop being true, then do it.
+- The user writes these by hand: `spec/ANALYTICS.md`, every `expected.json`, `spec/fixtures/pending.txt`, the `Activity` records, `Rational` and its rounding method, the buys-only replay, the sale fraction, the invariant sentences, `docs/mistakes.md`, `docs/questions.md`, the decision records in `docs/decisions/`, the README's tradeoffs, the weekly status, and the Why, How I tested, and Risk of every pull request. Do not write them, and do not change their logic outside a gate's scratch branch. Explain ideas, read errors, answer syntax questions, and review the user's code instead. If the user asks you to write one of them by name, say once that the sentence at the end of "Who writes what" would stop being true, then do it.
 - You write the rest, as `plan.md` lists it.
-- In `java/src/main/**`, work only against signatures the user wrote, and name the fixtures that prove each one. To extend the user's replay, add code behind their signatures and never rewrite theirs. One issue per pull request. Show the whole diff. The user reviews it as "Reviews" in `plan.md` says, and merges it.
+- In `java/src/main/**`, work only against signatures the user wrote, and name the fixtures that prove each one. To extend the user's replay, add code behind their signatures and never rewrite theirs. One pull request per change. Show the whole diff. The user reviews it as "Reviews" in `plan.md` says, and merges it.
 - When money code fails, in a fixture or a generated ledger, ask for the user's diagnosis first: which rule broke, and where. If they are stuck after 20 minutes, give a hint, not a fix. Change code only after they have written a diagnosis and a failing test or fixture shows the bug, and fix only your own files.
 
-## Issues and pull requests
+## Pull requests
 
-Follow "Issues and pull requests" in `plan.md`.
+Follow "Pull requests" in `plan.md`.
 
-- Work from one GitHub issue at a time, and stay inside its scope. If a request has no issue, ask the user to write one for money-path work. For anything else, draft one for the user to edit, and wait for their go-ahead.
-- One issue, one branch, one pull request. Never push to `main`, never merge, and never close an issue by hand. The user merges.
+- One branch, one pull request. Stay inside that pull request's scope. Never push to `main`, and never merge. The user merges.
+- When the user asks what is next, or for the steps, give the remaining steps of the current week from `plan.md`, in order, as the work itself.
 - Commit on the branch at every green state. Name the fixtures in the message.
-- In the pull request, draft What changed and Written by, and write `Closes #<issue>`. Leave Why, How I tested, and Risk for the user.
+- In the pull request, draft What changed and Written by. Leave Why, How I tested, and Risk for the user.
 
 ## Reviews
 
-- When asked to review a pull request, review the diff against `spec/ANALYTICS.md` and its issue. Report correctness gaps, spec mismatches, and missing tests, each with its file and line. Skip style.
+- When asked to review a pull request, review the diff against `spec/ANALYTICS.md` and the pull request. Report correctness gaps, spec mismatches, and missing tests, each with its file and line. Skip style.
 - On a pull request that touches an `expected.json`, check the input files against the user's description and the report's shape. Never compute, check, or suggest an expected cent.
 - During a review, do not change the user's files. Describe the problem, and let the user fix it.
 - Do not review a pull request you helped write in this conversation. Say so and stop. The review needs a new chat.
