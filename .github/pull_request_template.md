@@ -20,10 +20,3 @@
 
 
 <!-- Yours. What could break, and how to roll it back. -->
-
-
-## Written by
-
-
-- By hand:
-- By an agent:

@@ -151,7 +151,7 @@ Every change moves the way it does on a team that works with agents: a branch, a
 
 1. One branch, one pull request. Name the branch after the work, for example `sale-fraction`. Keep a pull request small enough to read in one sitting. Stay inside that pull request's scope.
 2. Commit on the branch whenever the tests you touched are green. Nothing is pushed to `main` directly.
-3. The pull request follows the template in `.github/`: What changed, Why, How I tested, Risk, and Written by. An agent may draft What changed. Why, How I tested, and Risk are yours, even when an agent wrote the code. Written by lists the files you typed and the files an agent typed.
+3. The pull request follows the template in `.github/`: What changed, Why, How I tested, and Risk. An agent may draft What changed. Why, How I tested, and Risk are yours, even when an agent wrote the code.
 4. Merge when the review is done and that change's done line is true. From the week of 23 November, CI is green as well. Squash-merge, so `main` holds one commit per pull request.
 
 ### Reviews

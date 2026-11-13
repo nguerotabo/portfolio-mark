@@ -33,7 +33,7 @@ Follow "Pull requests" in `plan.md`.
 - One branch, one pull request. Stay inside that pull request's scope. Never push to `main`, and never merge. The user merges.
 - When the user asks what is next, or for the steps, give the remaining steps of the current week from `plan.md`, in order, as the work itself.
 - Commit on the branch at every green state. Name the fixtures in the message.
-- In the pull request, draft What changed and Written by. Leave Why, How I tested, and Risk for the user.
+- In the pull request, draft What changed. Leave Why, How I tested, and Risk for the user.
 
 ## Reviews
 
