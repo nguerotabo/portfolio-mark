@@ -1,0 +1,35 @@
+{
+    "asOf": "2026-06-22",
+    "fund": "FUND",
+    "paths": {
+      "allOnDayOne": 110000,
+      "fundOnYourDates": 110000,
+      "benchmark": 100000,
+      "account": 100000
+    },
+    "steps": {
+      "whenMoneyArrived": 0,
+      "cashAndSales": -10000,
+      "stockSelection": 0
+    },
+    "headline": -10000,
+    "picks": [
+    ],
+    "bestPick": null,
+    "largestDrag": null,
+    "activities": [
+      {
+        "date": "2026-06-15",
+        "time": null,
+        "type": "deposit",
+        "symbol": null,
+        "currency": "CAD",
+        "quantity": "1000.0000",
+        "unitPrice": null,
+        "cash": 100000,
+        "sourceRow": 2
+      }
+    ],
+    "warnings": []
+  }
+  
