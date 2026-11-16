@@ -1,0 +1,8 @@
+{
+    "error": {
+      "code": "cash-below-zero",
+      "fields": { "date": "2026-06-02", "shortfall": 100 },
+      "message": "Cash is below zero."
+    }
+}
+  

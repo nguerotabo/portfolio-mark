@@ -1,0 +1,9 @@
+{
+    "error": {
+      "code": "currency",
+      "fields": { "currency": "USD",
+                "row": 3 },
+      "message": "Second currency present."
+    }
+}
+  

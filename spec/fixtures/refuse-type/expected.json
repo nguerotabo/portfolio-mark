@@ -1,0 +1,9 @@
+{
+    "error": {
+      "code": "type",
+      "fields": { "type": "Trade", "subType": "SPLIT",
+                "row": 2 },
+      "message": "Inexistant type."
+    }
+}
+  

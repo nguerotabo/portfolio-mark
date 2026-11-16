@@ -1,0 +1,8 @@
+{
+    "error": {
+      "code": "oversell",
+      "fields": { "symbol": "Stock A", "date": "2026-06-02"},
+      "message": "Oversell identified."
+    }
+}
+  
