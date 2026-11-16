@@ -1,0 +1,8 @@
+{
+    "error": {
+      "code": "missing-close",
+      "fields": { "symbol": "FUND", "date": "2026-06-01"},
+      "message": "Missing close within 7 days."
+    }
+}
+  

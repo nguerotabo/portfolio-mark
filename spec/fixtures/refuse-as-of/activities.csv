@@ -1,0 +1,2 @@
+effective_date,effective_time,settlement_date,account_id,account_type,activity_type,activity_sub_type,description,direction,symbol,name,currency,quantity,unit_price,commission,net_cash_amount
+2026-06-10,,,DEMO,,Trade,BUY,,,Stock A,,CAD,1,10,0,-10

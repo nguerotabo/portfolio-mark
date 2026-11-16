@@ -1,0 +1,8 @@
+{
+    "error": {
+      "code": "as-of",
+      "fields": { "asOf": "2026-06-01", "lastActivity": "2026-06-10" },
+      "message": "As of date is before last activity."
+    }
+}
+  

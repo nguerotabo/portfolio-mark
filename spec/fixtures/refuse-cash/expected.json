@@ -1,0 +1,8 @@
+{
+    "error": {
+      "code": "cash",
+      "fields": { "row": 2, "gap": 50 },
+      "message": "Cash is wrong."
+    }
+  }
+  

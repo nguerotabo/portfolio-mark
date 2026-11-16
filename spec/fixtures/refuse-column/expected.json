@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "column",
+    "fields": { "column": "symbol" },
+    "message": "Missing column symbol."
+  }
+}
