@@ -1,0 +1,4 @@
+effective_date,effective_time,settlement_date,account_id,account_type,activity_type,activity_sub_type,description,direction,symbol,name,currency,quantity,unit_price,commission,net_cash_amount
+2021-01-15,,,DEMO,,Trade,BUY,,,Stock A,,CAD,100,40,0,-4000
+2021-03-01,,,DEMO,,Trade,BUY,,,Stock B,,CAD,100,20,0,-2000
+2021-06-01,,,DEMO,,Trade,SELL,,,Stock A,,CAD,50,60,0,3000

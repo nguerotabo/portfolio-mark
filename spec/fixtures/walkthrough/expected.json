@@ -1,0 +1,69 @@
+{
+    "asOf": "2021-12-01",
+    "fund": "FUND",
+    "paths": {
+      "allOnDayOne": 900000,
+      "fundOnYourDates": 840000,
+      "benchmark": 780000,
+      "account": 900000
+    },
+    "steps": {
+      "whenMoneyArrived": -60000,
+      "cashAndSales": -60000,
+      "stockSelection": 120000
+    },
+    "headline": 60000,
+    "picks": [
+      {
+        "symbol": "Stock A",
+        "impact": 110000,
+        "dividends": 0,
+        "lots": [{ "account": 650000, "fund": 540000 }]
+      },
+      {
+        "symbol": "Stock B",
+        "impact": 10000,
+        "dividends": 0,
+        "lots": [{ "account": 250000, "fund": 240000 }]
+      }
+    ],
+    "bestPick": "Stock A",
+    "largestDrag": null,
+    "activities": [
+      {
+        "date": "2021-01-15",
+        "time": null,
+        "type": "buy",
+        "symbol": "Stock A",
+        "currency": "CAD",
+        "quantity": "100",
+        "unitPrice": "40",
+        "cash": -400000,
+        "sourceRow": 2
+      },
+      {
+        "date": "2021-03-01",
+        "time": null,
+        "type": "buy",
+        "symbol": "Stock B",
+        "currency": "CAD",
+        "quantity": "100",
+        "unitPrice": "20",
+        "cash": -200000,
+        "sourceRow": 3
+      },
+      {
+        "date": "2021-06-01",
+        "time": null,
+        "type": "sale",
+        "symbol": "Stock A",
+        "currency": "CAD",
+        "quantity": "50",
+        "unitPrice": "60",
+        "cash": 300000,
+        "sourceRow": 4
+      }
+    ],
+    "warnings": []
+  }
+  
