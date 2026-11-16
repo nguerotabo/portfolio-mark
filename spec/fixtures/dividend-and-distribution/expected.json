@@ -1,0 +1,52 @@
+{
+    "asOf": "2026-06-22",
+    "fund": "FUND",
+    "paths": {
+      "allOnDayOne": 12000,
+      "fundOnYourDates": 12000,
+      "benchmark": 12000,
+      "account": 12500
+    },
+    "steps": {
+      "whenMoneyArrived": 0,
+      "cashAndSales": 0,
+      "stockSelection": 500
+    },
+    "headline": 500,
+    "picks": [
+        {
+            "symbol": "Stock A",
+            "impact": 500,
+            "dividends": 500,
+            "lots": [{ "account": 12000, "fund": 12000 }]
+          }
+    ],
+    "bestPick": "Stock A",
+    "largestDrag": null,
+    "activities": [
+      {
+        "date": "2026-06-01",
+        "time": null,
+        "type": "buy",
+        "symbol": "Stock A",
+        "currency": "CAD",
+        "quantity": "10",
+        "unitPrice": "10",
+        "cash": -10000,
+        "sourceRow": 2
+      },
+      {
+        "date": "2026-06-08",
+        "time": null,
+        "type": "dividend",
+        "symbol": "Stock A",
+        "currency": "CAD",
+        "quantity": "5.0000",
+        "unitPrice": null,
+        "cash": 500,
+        "sourceRow": 3
+      }
+    ],
+    "warnings": []
+}
+  
