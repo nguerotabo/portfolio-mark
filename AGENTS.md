@@ -51,8 +51,9 @@ Follow "Pull requests" in `plan.md`.
 
 When the user asks for the gate, run "The weekly gate" in `plan.md`, one item at a time, and wait for each answer.
 
-- Do not hint while an item is in progress, and do not grade generously. A vague answer is a miss.
-- Write the ledger for the predict item, but never its answer.
+- If the user asks for help during an item, give it. Do not volunteer a hint they did not ask for.
+- The user decides the grade. If they say an item passes, treat it as passed and go to the next item.
+- Write the ledger for the predict item. Give its answer when they ask for help on that item. Do not give it before they ask.
 - Plant bugs and make practice changes only on a scratch branch, and delete it afterward.
 - At the end, list the questions the user missed, so they can write them into `docs/questions.md`. Do not write that file.
 - Do not start the next week's work until every item has passed. If the user asks to skip the gate, say once that `plan.md` requires it, then do as they ask.

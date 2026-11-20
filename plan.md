@@ -265,11 +265,11 @@ Every build week ends with the gate, and the next week starts only after it pass
 1. **Explain.** Without notes, three minutes on this week's part: what goes in, what comes out, and why it is built that way.
 2. **Predict.** The agent writes a ledger of three to five rows you have not seen. Compute the affected numbers on paper, then run the engine. If they disagree, find out which of you is wrong.
 3. **Trace.** From memory, name the classes and methods one of those rows passes through. Then check the code.
-4. **Find the bug.** On a scratch branch, the agent plants one bug in this week's code. Find it within 20 minutes using the tests and your own reading, with no agent help. Delete the branch.
-5. **Change it by hand.** On a scratch branch, make one small change the agent names, with no agent help, and get the tests green. Delete the branch.
+4. **Find the bug.** On a scratch branch, the agent plants one bug in this week's code. Find it within 20 minutes using the tests and your own reading. If you ask for help, the agent gives it. Delete the branch.
+5. **Change it by hand.** On a scratch branch, make one small change the agent names, and get the tests green. If you ask for help, the agent gives it. Delete the branch.
 6. **Say why not.** Name the main alternative to this week's biggest decision, and why it lost.
 
-Pass means all six, without notes or agent help. A miss means the next session starts with that item again. Write every question you missed into `docs/questions.md`, with the answer in your words.
+You try each item on your own. If you ask for help during an item, the agent gives it. You decide whether an item passes. If you say it passes, it passes, and the gate goes to the next item. A miss you accept means the next session starts with that item again. Write every question you missed into `docs/questions.md`, with the answer in your words.
 
 The sentence you can say, if it is true: "I wrote the spec, every expected cent, the activity model, the exact arithmetic, the buys-only replay, and the sale rule. Agents wrote the rest of the Java against signatures and fixtures I gave them, and I read every line. A different model wrote the Python check from the spec alone. Every fixture has to match answers I computed by hand, and the two engines have to agree on thousands of generated ledgers. Every change went through a reviewed pull request, and no code merged with CI red."
 

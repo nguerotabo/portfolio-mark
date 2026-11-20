@@ -1,0 +1,11 @@
+1. What goes into the reader is a case folder: `activities.csv`, `prices.csv`, `distributions.csv` when a fund pays one, and `run.json` when a fund and an as-of date have been chosen. `CsvReader` turns each spreadsheet row into its activity record, checks the row, and sorts the list. A spreadsheet error stops there: `CaseRead` returns that one error and does not look at `run.json`. If the spreadsheet is good and `run.json` is missing, the result is the activities and the warnings. If `run.json` is present, the as-of date must be on the last activity or after it, and the result also carries that date and the fund. `ReportRow` writes each activity as the nine report fields, and `Cases.reportJson` puts those rows into one JSON report. A bad file is one error and no activities because a failed check means the later paths would be a guess. The run stops at that error.
+
+2. Every activity has a date. The reader emits them by date, then by time. A missing time comes first on that date. The source row is the last key, so the same date and time keep file order. Cash in cents is `net_cash_amount` moved two decimal places, not `unit_price * quantity * 100`. A deposit has no unit price, and its cash is still the cash column in cents.
+
+3. A deposit passes through `CaseRead.read`, `CsvReader.read`, `readRow`, the sort, `ledger`, `ReportRow.from`, and `Cases.reportJson`. `ReadPiece` is the wrapper around one row. It is not a method. `reportJson` calls `write`, and `write` calls `ReportRow.from`, which puts the deposit into the `activities` array.
+
+4. The as-of refusal is decided in `CaseRead.read`. It uses `isBefore`: the as-of date is before the last activity's date.
+
+5. The sort is chained with `thenComparingInt` after the time comparison. The source row is an `int` on the activity because it is the CSV line number, 1, 2, 3, and so on. It is never null and never a fraction.
+
+6. One `Activity` constructor that takes the CSV type string still compiles when a kind of row is forgotten. A sealed record per type makes a `switch` cover every record, so a missing `Buy` or `Deposit` case does not compile. A new activity is a new record, and every `switch` has to gain a case or the compiler rejects it.
