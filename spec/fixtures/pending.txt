@@ -11,10 +11,11 @@ as-of-input warnings
 
 buys-only asOf
 buys-only fund
-buys-only paths
-buys-only steps
+buys-only paths.allOnDayOne
+buys-only paths.fundOnYourDates
+buys-only steps.whenMoneyArrived
+buys-only steps.cashAndSales
 buys-only headline
-buys-only picks
 buys-only bestPick
 buys-only largestDrag
 buys-only activities
@@ -74,10 +75,11 @@ dividend-then-buy warnings
 
 half-cent asOf
 half-cent fund
-half-cent paths
-half-cent steps
+half-cent paths.allOnDayOne
+half-cent paths.fundOnYourDates
+half-cent steps.whenMoneyArrived
+half-cent steps.cashAndSales
 half-cent headline
-half-cent picks
 half-cent bestPick
 half-cent largestDrag
 half-cent activities
@@ -137,5 +139,4 @@ weekend-deposit largestDrag
 weekend-deposit activities
 weekend-deposit warnings
 
-refuse-missing-close error
 refuse-oversell error

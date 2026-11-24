@@ -8,16 +8,20 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import mark.analytics.Picks;
 import mark.ledger.Activity;
 import mark.ledger.CsvReader;
+import mark.ledger.Dividend;
 import mark.ledger.ReportRow;
+import mark.ledger.Sell;
 
 /**
  * One case folder in, its report as JSON text.
  *
  * <p>Proves the activities of deposit-quantity, dividend-quantity, cash-check, and same-second, and
  * the errors of refuse-column, refuse-currency, refuse-account, refuse-type, refuse-withdrawal,
- * refuse-cash, refuse-cash-below-zero, and refuse-as-of.
+ * refuse-cash, refuse-cash-below-zero, and refuse-as-of. With {@code run.json}, also the account,
+ * benchmark, stock selection, and picks of buys-only and half-cent, and refuse-missing-close.
  */
 public final class Cases {
   private static final ObjectMapper JSON = new ObjectMapper();
@@ -44,11 +48,55 @@ public final class Cases {
       return JSON.writeValueAsString(root);
     }
     CaseRead.WithRun run = (CaseRead.WithRun) read;
+    if (!replayBuilt(run.activities())) {
+      root.put("asOf", run.asOf().toString());
+      root.put("fund", run.fund());
+      root.set("activities", activitiesNode(run.activities()));
+      root.set("warnings", warningsNode(run.warnings()));
+      return JSON.writeValueAsString(root);
+    }
+    Picks.Result result =
+        Picks.calculatePicks(run.activities(), run.market(), run.fund(), run.asOf());
+    if (result instanceof Picks.Refused refused) {
+      root.set("error", errorNode(refused.error()));
+      return JSON.writeValueAsString(root);
+    }
+    Picks.Replay replay = (Picks.Replay) result;
     root.put("asOf", run.asOf().toString());
     root.put("fund", run.fund());
+    ObjectNode paths = root.putObject("paths");
+    paths.put("benchmark", replay.benchmark());
+    paths.put("account", replay.account());
+    root.putObject("steps").put("stockSelection", replay.stockSelection());
+    root.set("picks", picksNode(replay.picks()));
     root.set("activities", activitiesNode(run.activities()));
     root.set("warnings", warningsNode(run.warnings()));
     return JSON.writeValueAsString(root);
+  }
+
+  /** Sales and dividends wait for the replay weeks that build them. */
+  private static boolean replayBuilt(List<Activity> activities) {
+    for (Activity activity : activities) {
+      if (activity instanceof Sell || activity instanceof Dividend) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static ArrayNode picksNode(List<Picks.Pick> picks) {
+    ArrayNode rows = JSON.createArrayNode();
+    for (Picks.Pick pick : picks) {
+      ObjectNode node = rows.addObject();
+      node.put("symbol", pick.symbol());
+      node.put("impact", pick.impact());
+      node.put("dividends", pick.dividends());
+      ArrayNode lots = node.putArray("lots");
+      for (Picks.Lot lot : pick.lots()) {
+        lots.addObject().put("account", lot.account()).put("fund", lot.fund());
+      }
+    }
+    return rows;
   }
 
   private static ArrayNode activitiesNode(List<Activity> activities) {
