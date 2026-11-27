@@ -12,7 +12,6 @@ import mark.analytics.Bridge;
 import mark.analytics.Picks;
 import mark.ledger.Activity;
 import mark.ledger.CsvReader;
-import mark.ledger.Dividend;
 import mark.ledger.ReportRow;
 
 /**
@@ -21,8 +20,8 @@ import mark.ledger.ReportRow;
  * <p>Proves the activities of deposit-quantity, dividend-quantity, cash-check, and same-second, and
  * the errors of refuse-column, refuse-currency, refuse-account, refuse-type, refuse-withdrawal,
  * refuse-cash, refuse-cash-below-zero, and refuse-as-of. With {@code run.json}, also the paths,
- * steps, headline, and picks of buys-only, half-cent, walkthrough, weekend-deposit, and
- * as-of-input, and refuse-missing-close and refuse-oversell.
+ * steps, headline, and picks of every fixture with {@code run.json}, and refuse-missing-close and
+ * refuse-oversell.
  */
 public final class Cases {
   private static final ObjectMapper JSON = new ObjectMapper();
@@ -49,13 +48,6 @@ public final class Cases {
       return JSON.writeValueAsString(root);
     }
     CaseRead.WithRun run = (CaseRead.WithRun) read;
-    if (!replayBuilt(run.activities())) {
-      root.put("asOf", run.asOf().toString());
-      root.put("fund", run.fund());
-      root.set("activities", activitiesNode(run.activities()));
-      root.set("warnings", warningsNode(run.warnings()));
-      return JSON.writeValueAsString(root);
-    }
     Bridge.Result result =
         Bridge.calculate(run.activities(), run.market(), run.fund(), run.asOf());
     if (result instanceof Bridge.Refused refused) {
@@ -83,16 +75,6 @@ public final class Cases {
     root.set("activities", activitiesNode(run.activities()));
     root.set("warnings", warningsNode(run.warnings()));
     return JSON.writeValueAsString(root);
-  }
-
-  /** Dividends wait for the replay week that builds them. */
-  private static boolean replayBuilt(List<Activity> activities) {
-    for (Activity activity : activities) {
-      if (activity instanceof Dividend) {
-        return false;
-      }
-    }
-    return true;
   }
 
   private static ArrayNode picksNode(List<Picks.Pick> picks) {
