@@ -8,20 +8,21 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import mark.analytics.Bridge;
 import mark.analytics.Picks;
 import mark.ledger.Activity;
 import mark.ledger.CsvReader;
 import mark.ledger.Dividend;
 import mark.ledger.ReportRow;
-import mark.ledger.Sell;
 
 /**
  * One case folder in, its report as JSON text.
  *
  * <p>Proves the activities of deposit-quantity, dividend-quantity, cash-check, and same-second, and
  * the errors of refuse-column, refuse-currency, refuse-account, refuse-type, refuse-withdrawal,
- * refuse-cash, refuse-cash-below-zero, and refuse-as-of. With {@code run.json}, also the account,
- * benchmark, stock selection, and picks of buys-only and half-cent, and refuse-missing-close.
+ * refuse-cash, refuse-cash-below-zero, and refuse-as-of. With {@code run.json}, also the paths,
+ * steps, headline, and picks of buys-only, half-cent, walkthrough, weekend-deposit, and
+ * as-of-input, and refuse-missing-close and refuse-oversell.
  */
 public final class Cases {
   private static final ObjectMapper JSON = new ObjectMapper();
@@ -55,29 +56,39 @@ public final class Cases {
       root.set("warnings", warningsNode(run.warnings()));
       return JSON.writeValueAsString(root);
     }
-    Picks.Result result =
-        Picks.calculatePicks(run.activities(), run.market(), run.fund(), run.asOf());
-    if (result instanceof Picks.Refused refused) {
+    Bridge.Result result =
+        Bridge.calculate(run.activities(), run.market(), run.fund(), run.asOf());
+    if (result instanceof Bridge.Refused refused) {
       root.set("error", errorNode(refused.error()));
       return JSON.writeValueAsString(root);
     }
-    Picks.Replay replay = (Picks.Replay) result;
+    Bridge.Built built = (Bridge.Built) result;
+    Bridge bridge = built.bridge();
+    Picks.Replay replay = built.replay();
     root.put("asOf", run.asOf().toString());
     root.put("fund", run.fund());
     ObjectNode paths = root.putObject("paths");
-    paths.put("benchmark", replay.benchmark());
-    paths.put("account", replay.account());
-    root.putObject("steps").put("stockSelection", replay.stockSelection());
+    paths.put("allOnDayOne", bridge.allOnDayOne());
+    paths.put("fundOnYourDates", bridge.fundOnYourDates());
+    paths.put("benchmark", bridge.benchmark());
+    paths.put("account", bridge.account());
+    ObjectNode steps = root.putObject("steps");
+    steps.put("whenMoneyArrived", bridge.whenMoneyArrived());
+    steps.put("cashAndSales", bridge.cashAndSales());
+    steps.put("stockSelection", bridge.stockSelection());
+    root.put("headline", bridge.headline());
     root.set("picks", picksNode(replay.picks()));
+    root.put("bestPick", replay.bestPick());
+    root.put("largestDrag", replay.largestDrag());
     root.set("activities", activitiesNode(run.activities()));
     root.set("warnings", warningsNode(run.warnings()));
     return JSON.writeValueAsString(root);
   }
 
-  /** Sales and dividends wait for the replay weeks that build them. */
+  /** Dividends wait for the replay week that builds them. */
   private static boolean replayBuilt(List<Activity> activities) {
     for (Activity activity : activities) {
-      if (activity instanceof Sell || activity instanceof Dividend) {
+      if (activity instanceof Dividend) {
         return false;
       }
     }

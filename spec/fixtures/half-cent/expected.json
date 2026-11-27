@@ -36,6 +36,16 @@
         "sourceRow": 2
       }
     ],
-    "warnings": []
+    "warnings": [
+      {
+        "code": "price-jump",
+        "fields": {
+          "symbol": "FUND",
+          "date": "2026-11-13",
+          "previousDate": "2026-11-10"
+        },
+        "message": "Close for FUND on 2026-11-13 is more than 20% from 2026-11-10."
+      }
+    ]
   }
   

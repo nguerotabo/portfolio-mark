@@ -7,6 +7,8 @@ public record Rational(BigInteger numerator, BigInteger denominator) {
 
     private static final BigInteger HUNDRED = BigInteger.valueOf(100);
 
+    public static final Rational ZERO = new Rational(BigInteger.ZERO, BigInteger.ONE);
+
     public Rational {
         if (denominator.signum() == 0) {
             throw new ArithmeticException("denominator is zero");
@@ -38,6 +40,24 @@ public record Rational(BigInteger numerator, BigInteger denominator) {
 
     public Rational divide(Rational other) {
         return new Rational(numerator.multiply(other.denominator), denominator.multiply(other.numerator));
+    }
+
+    public Rational add(Rational other) {
+        return new Rational(
+                numerator.multiply(other.denominator).add(other.numerator.multiply(denominator)),
+                denominator.multiply(other.denominator));
+    }
+
+    public Rational subtract(Rational other) {
+        return add(new Rational(other.numerator.negate(), other.denominator));
+    }
+
+    public int compareTo(Rational other) {
+        return numerator.multiply(other.denominator).compareTo(other.numerator.multiply(denominator));
+    }
+
+    public int signum() {
+        return numerator.signum();
     }
 
     /** Dollars to whole cents, half to even. The only rounding in the replay. */
