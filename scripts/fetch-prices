@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["yfinance"]
+# ///
+"""Download raw closes and distributions once, and save them with their source and date.
+
+The only file in this repository that calls a price site. Run it by hand. The program and CI
+never run it.
+
+    scripts/fetch-prices --start 2025-01-02 --end 2026-11-27 --out demo XIC=XIC.TO VCN=VCN.TO
+
+Each argument is SYMBOL=TICKER: SYMBOL is what goes in the files and must match the activities
+file and run.json, TICKER is what Yahoo Finance calls it. A bare TICKER uses itself as the symbol.
+
+Writes prices.csv (symbol,date,close), distributions.csv (symbol,ex_date,amount_per_share) when
+any symbol paid one, and SOURCES.md, all in --out, replacing what was there. Closes are raw, not
+adjusted for distributions (auto_adjust=False). A split inside the dates stops the download,
+because the spec does not support splits.
+"""
+
+import argparse
+import csv
+import datetime as dt
+import sys
+from decimal import Decimal
+from pathlib import Path
+
+CLOSE_PLACES = Decimal("0.0001")
+AMOUNT_PLACES = Decimal("0.000001")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("--start", required=True, type=dt.date.fromisoformat)
+    parser.add_argument("--end", required=True, type=dt.date.fromisoformat, help="inclusive")
+    parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("symbols", nargs="+", metavar="SYMBOL=TICKER")
+    args = parser.parse_args()
+    if args.end < args.start:
+        parser.error("--end is before --start")
+    pairs = []
+    for item in args.symbols:
+        symbol, _, ticker = item.partition("=")
+        pairs.append((symbol, ticker or symbol))
+    return args, pairs
+
+
+def decimal_text(value, places):
+    return str(Decimal(repr(float(value))).quantize(places))
+
+
+def main():
+    args, pairs = parse_args()
+    import yfinance
+
+    closes, distributions, splits = [], [], []
+    for symbol, ticker in pairs:
+        history = yfinance.Ticker(ticker).history(
+            start=args.start.isoformat(),
+            end=(args.end + dt.timedelta(days=1)).isoformat(),
+            auto_adjust=False,
+            actions=True,
+        )
+        if history.empty:
+            sys.exit(f"No rows for {ticker} from {args.start} to {args.end}.")
+        for stamp, row in history.iterrows():
+            day = stamp.date().isoformat()
+            closes.append((symbol, day, decimal_text(row["Close"], CLOSE_PLACES)))
+            if row.get("Dividends", 0):
+                distributions.append(
+                    (symbol, day, decimal_text(row["Dividends"], AMOUNT_PLACES))
+                )
+            if row.get("Stock Splits", 0):
+                splits.append(f"{ticker} {day} {row['Stock Splits']}")
+
+    if splits:
+        sys.exit("Split inside the dates, which the spec does not support: " + ", ".join(splits))
+
+    args.out.mkdir(parents=True, exist_ok=True)
+    write_csv(args.out / "prices.csv", ["symbol", "date", "close"], closes)
+    paid = args.out / "distributions.csv"
+    if distributions:
+        write_csv(paid, ["symbol", "ex_date", "amount_per_share"], distributions)
+    elif paid.exists():
+        paid.unlink()
+    write_sources(args, pairs, len(closes), len(distributions))
+    print(f"{len(closes)} closes and {len(distributions)} distributions written to {args.out}")
+
+
+def write_csv(path, header, rows):
+    with path.open("w", newline="") as file:
+        writer = csv.writer(file, lineterminator="\n")
+        writer.writerow(header)
+        writer.writerows(sorted(rows))
+
+
+def write_sources(args, pairs, close_count, distribution_count):
+    import yfinance
+
+    tickers = "\n".join(f"- `{symbol}`: Yahoo Finance `{ticker}`" for symbol, ticker in pairs)
+    text = f"""# Sources
+
+Downloaded once by `scripts/fetch-prices` on {dt.date.today().isoformat()}, with yfinance
+{yfinance.__version__}, for {args.start.isoformat()} to {args.end.isoformat()}.
+
+{tickers}
+
+`prices.csv` holds {close_count} raw closes (`auto_adjust=False`, so not adjusted for
+distributions), rounded to 4 decimals. `distributions.csv` holds {distribution_count} cash
+distributions by ex-date, per share, rounded to 6 decimals. No split fell inside the dates.
+"""
+    (args.out / "SOURCES.md").write_text(text)
+
+
+if __name__ == "__main__":
+    main()
