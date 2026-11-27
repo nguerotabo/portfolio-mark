@@ -17,6 +17,16 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
 
+tasks.jar {
+    archiveFileName.set("mark.jar")
+    manifest {
+        attributes("Main-Class" to "mark.Main")
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
