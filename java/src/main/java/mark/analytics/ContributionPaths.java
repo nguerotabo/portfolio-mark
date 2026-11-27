@@ -13,9 +13,11 @@ import mark.market.Market;
 
 /**
  * All on day one and fund on your dates. Each contribution is its own fund lot, bought and held.
- * Neither path sells. Interest and tax are cash on both.
+ * Neither path sells. Each lot is paid the fund's distributions inside its single rounding.
+ * Interest and tax are cash on both.
  *
- * <p>Proves walkthrough, weekend-deposit, as-of-input, buys-only, and half-cent.
+ * <p>Proves walkthrough, weekend-deposit, as-of-input, buys-only, half-cent,
+ * dividend-and-distribution, and self-holding.
  */
 public final class ContributionPaths {
 
@@ -71,6 +73,9 @@ public final class ContributionPaths {
     }
     Rational dayOneClose = close(dayOne);
     Rational asOfClose = close(valuation);
+    List<Market.Distribution> owed = Distributions.owed(market, fund, asOfDate);
+    Rational dayOnePerShare =
+        asOfClose.add(Distributions.perShareHeldFrom(owed, first.date()));
 
     long allOnDayOne = interestAndTax;
     long fundOnYourDates = interestAndTax;
@@ -80,8 +85,10 @@ public final class ContributionPaths {
         return new Refused(missing.error(), contribution.sourceRow());
       }
       Rational dollars = Rational.ofCents(contribution.cents());
-      allOnDayOne += dollars.divide(dayOneClose).multiply(asOfClose).toCents();
-      fundOnYourDates += dollars.divide(close(trade)).multiply(asOfClose).toCents();
+      Rational yourDatesPerShare =
+          asOfClose.add(Distributions.perShareHeldFrom(owed, contribution.date()));
+      allOnDayOne += dollars.divide(dayOneClose).multiply(dayOnePerShare).toCents();
+      fundOnYourDates += dollars.divide(close(trade)).multiply(yourDatesPerShare).toCents();
     }
     return new Values(allOnDayOne, fundOnYourDates);
   }

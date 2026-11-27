@@ -19,7 +19,9 @@ import mark.market.Market;
  * The replay of your account and the benchmark, with sales by fraction, and the pick impacts, in
  * whole cents.
  *
- * <p>Proves buys-only, half-cent, refuse-missing-close, walkthrough, and refuse-oversell.
+ * <p>Proves buys-only, half-cent, refuse-missing-close, walkthrough, refuse-oversell,
+ * dividend-quantity, interest-and-tax, dividend-then-buy, dividend-and-distribution, and
+ * self-holding.
  */
 public final class Picks {
 
@@ -88,12 +90,16 @@ public final class Picks {
   public static Result calculatePicks(
       List<Activity> activities, Market.Book market, String fund, LocalDate asOfDate) {
     Map<String, List<OpenLot>> lotsBySymbol = new TreeMap<>();
+    Map<String, Long> dividendsBySymbol = new TreeMap<>();
+    List<Market.Distribution> owed = Distributions.owed(market, fund, asOfDate);
+    int paid = 0;
     long deposits = 0;
     long spent = 0;
     long interestAndTax = 0;
     boolean hasDeposits = false;
 
     for (Activity activity : activities) {
+      paid = payDistributions(owed, paid, activity.date(), lotsBySymbol, fund);
       switch (activity) {
         case Buy buy -> {
           Rational dollars = Rational.ofCents(-buy.cash());
@@ -130,19 +136,24 @@ public final class Picks {
         }
         case Interest interest -> interestAndTax += interest.cash();
         case Tax tax -> interestAndTax += tax.cash();
-        case Dividend dividend ->
-            throw new UnsupportedOperationException(
-                "dividends are not built yet, source row " + dividend.sourceRow());
+        case Dividend dividend -> receiveDividend(dividend, dividendsBySymbol);
       }
     }
+    payDistributions(owed, paid, asOfDate, lotsBySymbol, fund);
 
     long contributions = hasDeposits ? deposits : spent;
     long cashOutsideLots = contributions - spent + interestAndTax;
 
+    Map<String, List<OpenLot>> symbols = new TreeMap<>(lotsBySymbol);
+    for (String symbol : dividendsBySymbol.keySet()) {
+      symbols.putIfAbsent(symbol, List.of());
+    }
+
     List<Pick> picks = new ArrayList<>();
     long accountLots = 0;
     long benchmarkLots = 0;
-    for (Map.Entry<String, List<OpenLot>> entry : lotsBySymbol.entrySet()) {
+    long dividends = 0;
+    for (Map.Entry<String, List<OpenLot>> entry : symbols.entrySet()) {
       List<Lot> lots = new ArrayList<>();
       long accountSum = 0;
       long fundSum = 0;
@@ -152,13 +163,63 @@ public final class Picks {
         accountSum += lot.account();
         fundSum += lot.fund();
       }
-      picks.add(new Pick(entry.getKey(), accountSum - fundSum, 0, List.copyOf(lots)));
+      long symbolDividends = dividendsBySymbol.getOrDefault(entry.getKey(), 0L);
+      picks.add(
+          new Pick(
+              entry.getKey(),
+              accountSum + symbolDividends - fundSum,
+              symbolDividends,
+              List.copyOf(lots)));
       accountLots += accountSum;
       benchmarkLots += fundSum;
+      dividends += symbolDividends;
     }
 
     return new Replay(
-        accountLots + cashOutsideLots, benchmarkLots + cashOutsideLots, List.copyOf(picks));
+        accountLots + dividends + cashOutsideLots,
+        benchmarkLots + cashOutsideLots,
+        List.copyOf(picks));
+  }
+
+  /**
+   * A symbol's dividend is cash on its real path, outside any lot, and one trace line under that
+   * symbol. It is on your account only, never on a fund path.
+   */
+  private static void receiveDividend(Dividend dividend, Map<String, Long> dividendsBySymbol) {
+    if (dividend.symbol() == null) {
+      throw new IllegalArgumentException(
+          "A dividend with no symbol is not in the spec, source row " + dividend.sourceRow());
+    }
+    dividendsBySymbol.merge(dividend.symbol(), dividend.cash(), Long::sum);
+  }
+
+  /**
+   * Pays every owed distribution with an ex-date on or before {@code upTo}, starting at {@code
+   * next}, to the shares each lot holds now. Called before the first row dated {@code upTo}, so
+   * those are the shares held at the end of the day before the ex-date. Every fund lot is paid. A
+   * lot of the comparison fund itself is paid on your path too. The cash stays inside the lot, so it
+   * is rounded once with it. Returns the next unpaid index.
+   */
+  private static int payDistributions(
+      List<Market.Distribution> owed,
+      int next,
+      LocalDate upTo,
+      Map<String, List<OpenLot>> lotsBySymbol,
+      String fund) {
+    while (next < owed.size() && !owed.get(next).exDate().isAfter(upTo)) {
+      Rational amount = Distributions.amount(owed.get(next));
+      for (Map.Entry<String, List<OpenLot>> entry : lotsBySymbol.entrySet()) {
+        boolean selfHolding = entry.getKey().equals(fund);
+        for (OpenLot lot : entry.getValue()) {
+          lot.fundProceeds = lot.fundProceeds.add(lot.fundShares.multiply(amount));
+          if (selfHolding) {
+            lot.proceeds = lot.proceeds.add(lot.shares.multiply(amount));
+          }
+        }
+      }
+      next++;
+    }
+    return next;
   }
 
   /**
